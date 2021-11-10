@@ -1,0 +1,322 @@
+An execution plan has been generated and is shown below.
+Resource actions are indicated with the following symbols:
+  + create
+  ~ update in-place
+  - destroy
++/- create replacement and then destroy
+
+Terraform will perform the following actions:
+
+  # module.squid_proxy.aws_autoscaling_group.main must be replaced
++/- resource "aws_autoscaling_group" "main" {
+      ~ arn                       = "arn:aws:autoscaling:ap-southeast-1:999470832247:autoScalingGroup:4c2de964-e679-4ee5-8b53-39081c589d99:autoScalingGroupName/mfcexac-proxy-86c991bb55a3f068" -> (known after apply)
+      ~ availability_zones        = [
+          - "ap-southeast-1a",
+          - "ap-southeast-1b",
+          - "ap-southeast-1c",
+        ] -> (known after apply)
+      - capacity_rebalance        = false -> null
+        default_cooldown          = 300
+      ~ desired_capacity          = 1 -> (known after apply)
+        enabled_metrics           = [
+            "GroupDesiredCapacity",
+            "GroupInServiceInstances",
+            "GroupMaxSize",
+            "GroupMinSize",
+            "GroupPendingInstances",
+            "GroupStandbyInstances",
+            "GroupTerminatingInstances",
+            "GroupTotalInstances",
+        ]
+        force_delete              = false
+        force_delete_warm_pool    = false
+        health_check_grace_period = 300
+        health_check_type         = "ELB"
+      ~ id                        = "mfcexac-proxy-86c991bb55a3f068" -> (known after apply)
+        load_balancers            = [
+            "mfcexac-lbint-cb24a8e7e29c624a",
+        ]
+      - max_instance_lifetime     = 0 -> null
+        max_size                  = 1
+        metrics_granularity       = "1Minute"
+        min_size                  = 1
+      ~ name                      = "mfcexac-proxy-86c991bb55a3f068" -> "mfcexac-proxy-a81ecfe5ffc72ccf" # forces replacement
+      + name_prefix               = (known after apply)
+        protect_from_scale_in     = false
+      ~ service_linked_role_arn   = "arn:aws:iam::999470832247:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling" -> (known after apply)
+      - suspended_processes       = [] -> null
+      ~ tags                      = [
+            {
+                "key"                 = "Description"
+                "propagate_at_launch" = "false"
+                "value"               = "ASG of the mfcexac-proxy cluster"
+            },
+            {
+                "key"                 = "Environment"
+                "propagate_at_launch" = "false"
+                "value"               = "staging"
+            },
+            {
+                "key"                 = "ManagedBy"
+                "propagate_at_launch" = "false"
+                "value"               = "terraform"
+            },
+          - {
+              - "key"                 = "Name"
+              - "propagate_at_launch" = "false"
+              - "value"               = "mfcexac-proxy-86c991bb55a3f068"
+            },
+          + {
+              + "key"                 = "Name"
+              + "propagate_at_launch" = "false"
+              + "value"               = "mfcexac-proxy-a81ecfe5ffc72ccf"
+            },
+            {
+                "key"                 = "ProductDomain"
+                "propagate_at_launch" = "false"
+                "value"               = "mfc"
+            },
+            {
+                "key"                 = "Service"
+                "propagate_at_launch" = "false"
+                "value"               = "mfcexac"
+            },
+        ]
+      - target_group_arns         = [] -> null
+        termination_policies      = [
+            "Default",
+        ]
+        vpc_zone_identifier       = [
+            "subnet-030e9325ad4268cb9",
+            "subnet-03515c27b6f639407",
+            "subnet-0fe5ca77c5663fb5a",
+        ]
+        wait_for_capacity_timeout = "7m"
+        wait_for_elb_capacity     = 1
+
+        initial_lifecycle_hook {
+            default_result       = "ABANDON"
+            heartbeat_timeout    = 600
+            lifecycle_transition = "autoscaling:EC2_INSTANCE_LAUNCHING"
+            name                 = "launch_instance_lifecycle"
+        }
+
+      ~ mixed_instances_policy {
+            instances_distribution {
+                on_demand_allocation_strategy            = "prioritized"
+                on_demand_base_capacity                  = 0
+                on_demand_percentage_above_base_capacity = 0
+                spot_allocation_strategy                 = "lowest-price"
+                spot_instance_pools                      = 2
+            }
+
+          ~ launch_template {
+              ~ launch_template_specification {
+                    launch_template_id   = "lt-06ab86c7403e5fd95"
+                  ~ launch_template_name = "mfcexac-proxy-5df0c48837a66509" -> (known after apply)
+                    version              = "$Latest"
+                }
+
+              ~ override {
+                    instance_type = "t3.micro"
+                }
+            }
+        }
+    }
+
+  # module.squid_proxy.aws_autoscaling_lifecycle_hook.launch_instance will be updated in-place
+  ~ resource "aws_autoscaling_lifecycle_hook" "launch_instance" {
+      ~ autoscaling_group_name = "mfcexac-proxy-86c991bb55a3f068" -> "mfcexac-proxy-a81ecfe5ffc72ccf"
+        default_result         = "ABANDON"
+        heartbeat_timeout      = 600
+        id                     = "launch_instance_lifecycle"
+        lifecycle_transition   = "autoscaling:EC2_INSTANCE_LAUNCHING"
+        name                   = "launch_instance_lifecycle"
+    }
+
+  # module.squid_proxy.aws_cloudwatch_event_rule.asg_instance_launch_lifecycle (deposed object cd9dcc2d) will be destroyed
+  - resource "aws_cloudwatch_event_rule" "asg_instance_launch_lifecycle" {
+      - arn            = "arn:aws:events:ap-southeast-1:999470832247:rule/mfcexac-proxy-86c991bb55a3f068-launch-instance" -> null
+      - description    = "Cloudwatch event rule for mfcexac-proxy-86c991bb55a3f068 instance launch" -> null
+      - event_bus_name = "default" -> null
+      - event_pattern  = jsonencode(
+            {
+              - detail      = {
+                  - AutoScalingGroupName = [
+                      - "mfcexac-proxy-86c991bb55a3f068",
+                    ]
+                }
+              - detail-type = [
+                  - "EC2 Instance-launch Lifecycle Action",
+                ]
+              - source      = [
+                  - "aws.autoscaling",
+                ]
+            }
+        ) -> null
+      - id             = "mfcexac-proxy-86c991bb55a3f068-launch-instance" -> null
+      - is_enabled     = true -> null
+      - name           = "mfcexac-proxy-86c991bb55a3f068-launch-instance" -> null
+      - tags           = {} -> null
+      - tags_all       = {} -> null
+    }
+
+  # module.squid_proxy.aws_cloudwatch_event_target.asg_instance_launch_associate_eip_and_configure_squid_acl will be created
+  + resource "aws_cloudwatch_event_target" "asg_instance_launch_associate_eip_and_configure_squid_acl" {
+      + arn            = "arn:aws:lambda:ap-southeast-1:999470832247:function:mfcexac-associate_eip_and_configure_squid_acl-8ae19e0a38c47a07"
+      + event_bus_name = "default"
+      + id             = (known after apply)
+      + rule           = "mfcexac-proxy-a81ecfe5ffc72ccf-launch-instance"
+      + target_id      = "associate_eip_and_configure_squid_acl"
+    }
+
+  # module.squid_proxy.aws_lambda_permission.allow_cloudwatch will be created
+  + resource "aws_lambda_permission" "allow_cloudwatch" {
+      + action        = "lambda:InvokeFunction"
+      + function_name = "mfcexac-associate_eip_and_configure_squid_acl-8ae19e0a38c47a07"
+      + id            = (known after apply)
+      + principal     = "events.amazonaws.com"
+      + source_arn    = "arn:aws:events:ap-southeast-1:999470832247:rule/mfcexac-proxy-a81ecfe5ffc72ccf-launch-instance"
+      + statement_id  = "AllowExecutionFromCloudWatch"
+    }
+
+  # module.squid_proxy.aws_ssm_document.set_squid_acl (deposed object f56773b6) will be destroyed
+  - resource "aws_ssm_document" "set_squid_acl" {
+      - arn              = "arn:aws:ssm:ap-southeast-1:999470832247:document/SetAclSquid-mfcexac-proxy-86c991bb55a3f068" -> null
+      - content          = jsonencode(
+            {
+              - description   = "Set ACL on squid proxy."
+              - mainSteps     = [
+                  - {
+                      - action = "aws:runShellScript"
+                      - inputs = {
+                          - runCommand = [
+                              - "#!/bin/bash",
+                              - "aws s3 cp s3://mfcexac-squid-acl-999470832247-97ebfc9930f8f329/squid.json /opt/aws/amazon-cloudwatch-agent/etc/squid.json",
+                              - "sudo systemctl stop awslogs.service",
+                              - "sudo amazon-cloudwatch-agent-ctl -a append-config -m ec2 -c 'file:/opt/aws/amazon-cloudwatch-agent/etc/squid.json' -s",
+                              - "aws s3 cp s3://mfcexac-squid-acl-999470832247-97ebfc9930f8f329/outbound_acl.conf /etc/squid/conf.d/outbound_acl.conf",
+                              - "aws s3 cp s3://mfcexac-squid-acl-999470832247-97ebfc9930f8f329/destination_domains /etc/squid/conf.d/destination_domains",
+                              - "aws s3 cp s3://mfcexac-squid-acl-999470832247-97ebfc9930f8f329/destination_ips /etc/squid/conf.d/destination_ips",
+                              - "cd /etc/squid/conf.d/",
+                              - "squid_parse_response=`sudo squid -k parse`",
+                              - "if [ \"$squid_parse_response\" = \"\" ]; then",
+                              - "   sudo squid -k reconfigure",
+                              - "else",
+                              - "   echo \"Error while parsing acl configuration\"",
+                              - "fi",
+                            ]
+                        }
+                      - name   = "setSquidACL"
+                    },
+                ]
+              - parameters    = {}
+              - schemaVersion = "2.2"
+            }
+        ) -> null
+      - created_date     = "2021-11-04T06:48:15Z" -> null
+      - default_version  = "1" -> null
+      - description      = "Set ACL on squid proxy." -> null
+      - document_format  = "JSON" -> null
+      - document_type    = "Command" -> null
+      - document_version = "1" -> null
+      - hash             = "5b0ab23366467f8362ea7dc9b256c861aecc77217ba55b56bb9445e12f9c291c" -> null
+      - hash_type        = "Sha256" -> null
+      - id               = "SetAclSquid-mfcexac-proxy-86c991bb55a3f068" -> null
+      - latest_version   = "1" -> null
+      - name             = "SetAclSquid-mfcexac-proxy-86c991bb55a3f068" -> null
+      - owner            = "999470832247" -> null
+      - parameter        = [] -> null
+      - permissions      = {} -> null
+      - platform_types   = [
+          - "Linux",
+          - "MacOS",
+        ] -> null
+      - schema_version   = "2.2" -> null
+      - status           = "Active" -> null
+      - tags             = {
+          - "Description"   = "Run Command to set ACL for mfcexac-proxy-86c991bb55a3f068"
+          - "Environment"   = "staging"
+          - "ManagedBy"     = "terraform"
+          - "Name"          = "SetAclSquid-mfcexac-proxy-86c991bb55a3f068"
+          - "ProductDomain" = "mfc"
+          - "Service"       = "mfcexac"
+        } -> null
+      - tags_all         = {
+          - "Description"   = "Run Command to set ACL for mfcexac-proxy-86c991bb55a3f068"
+          - "Environment"   = "staging"
+          - "ManagedBy"     = "terraform"
+          - "Name"          = "SetAclSquid-mfcexac-proxy-86c991bb55a3f068"
+          - "ProductDomain" = "mfc"
+          - "Service"       = "mfcexac"
+        } -> null
+    }
+
+  # module.squid_proxy.module.asg_name.random_id.this (deposed object 7f1735e8) will be destroyed
+  - resource "random_id" "this" {
+      - b64         = "mfcexac-proxy-hsmRu1Wj8Gg" -> null
+      - b64_std     = "mfcexac-proxy-hsmRu1Wj8Gg=" -> null
+      - b64_url     = "mfcexac-proxy-hsmRu1Wj8Gg" -> null
+      - byte_length = 8 -> null
+      - dec         = "mfcexac-proxy-9712454305182904424" -> null
+      - hex         = "mfcexac-proxy-86c991bb55a3f068" -> null
+      - id          = "hsmRu1Wj8Gg" -> null
+      - keepers     = {
+          - "ebs_delete_on_termination" = "true"
+          - "ebs_optimized"             = "false"
+          - "ebs_volume_size"           = "8"
+          - "ebs_volume_type"           = "gp2"
+          - "image_id"                  = "ami-0c53661ba63a0fa6c"
+          - "instance_profile"          = "InstanceProfile_mfcexac-proxy-456a4a09da547426"
+          - "key_name"                  = ""
+          - "monitoring"                = "true"
+          - "security_groups"           = "sg-0e97e5568e621945c"
+          - "user_data"                 = <<~EOT
+                Content-Type: multipart/mixed; boundary="MIMEBOUNDARY"
+                MIME-Version: 1.0
+                
+                --MIMEBOUNDARY
+                Content-Transfer-Encoding: 7bit
+                Content-Type: text/x-shellscript
+                Mime-Version: 1.0
+                
+                #!/bin/bash
+                
+                HOST="mfcexac-proxy`hostname | cut -c3-`"
+                echo "$HOST" > /etc/hostname
+                hostname -F /etc/hostname
+                sed -i /etc/hosts -r -e "1 i 127.0.1.1 $HOST" -e "/ip-/d"
+                
+                # inject datadog api key
+                DD_CONF_FILE='/etc/dd-agent/datadog.conf'
+                API_KEY=$(AWS_DEFAULT_REGION=ap-southeast-1 \
+                  aws ssm get-parameters --with-decryption \
+                  --name /tvlk-secret/shared/mfc/datadog.api.key \
+                  --query 'Parameters[].Value' \
+                  --output text)
+                
+                if [ -v API_KEY ]
+                then
+                  sed -i 's/^api_key.*/api_key: '"$API_KEY"'/'  $DD_CONF_FILE
+                  /etc/init.d/datadog-agent restart
+                else
+                  echo "api key is not valid! Exiting ..."
+                  exit
+                fi
+                
+                --MIMEBOUNDARY
+                Content-Disposition: attachment; filename="init.cfg"
+                Content-Transfer-Encoding: 7bit
+                Content-Type: text/cloud-config
+                Mime-Version: 1.0
+                
+                runcmd:
+                  - service awslogs restart
+                
+                --MIMEBOUNDARY--
+            EOT
+        } -> null
+      - prefix      = "mfcexac-proxy-" -> null
+    }
+
+Plan: 3 to add, 1 to change, 4 to destroy.
